@@ -1,107 +1,120 @@
-//
-//  ContentView.swift
-//  FINAL FINAL TRY SIMONSAYS
-//
-//  Created by Brody Dickson on 10/24/23.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     @State private var flash = [false, false, false, false]
     @State private var colorDisplay = [ColorDisplay(color: .green), ColorDisplay(color: .red), ColorDisplay(color: .yellow), ColorDisplay(color: .blue)]
-    @State private var timer = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
-    @State var index = 1
     @State var sequence = [Int]()
     @State var score = 0
-    @State var GameOVerOpac = 1.0
-    @State var PlayerActive = false
-    @State var PlayerTalk = "Your turn"
+    @State var gameOverOpacity = 0.0
+    @State var playerActive = false
+    @State var playerTalk = "Your turn"
+
     var body: some View {
         VStack {
-            Button("Play"){
-                GameOVerOpac = 0.0
-                flashColorDisplay(index: index)
-                
+            Button("Play") {
+                gameOverOpacity = 0.0
+                sequence = [Int.random(in: 0...3)]
+                flashColorSequence()
             }
-            Text("YOU FUCKING LOST BITCH")
+            Text("YOU LOST")
                 .font(.system(size: 36))
-                .opacity(GameOVerOpac)
-            Text(String(score))
-            HStack{
-                colorDisplay[0]
-                    .opacity(flash[0] ? 1 : 0.4)
-                    .onTapGesture {
-                        flashColorDisplay(index: 0)}
-                colorDisplay[1]
-                    .opacity(flash[1] ? 1 : 0.4)
-                    .onTapGesture {
-                        flashColorDisplay(index: 1)
-                        if index == 1 {
-                            score += 1
-                        } else {
-                            GameOver()
+                .opacity(gameOverOpacity)
+            Text("Score: \(score)")
+            VStack {
+                HStack {
+                    colorDisplay[0]
+                        .opacity(flash[0] ? 1 : 0.4)
+                        .onTapGesture {
+                            checkPlayerInput(0)
+                            flashColorDisplay(index: 0)
                         }
-                    }
+                    colorDisplay[1]
+                        .opacity(flash[1] ? 1 : 0.4)
+                        .onTapGesture {
+                            checkPlayerInput(1)
+                            flashColorDisplay(index: 1)
+                        }
+                }
+                HStack {
+                    colorDisplay[2]
+                        .opacity(flash[2] ? 1 : 0.4)
+                        .onTapGesture {
+                            checkPlayerInput(2)
+                            flashColorDisplay(index: 2)
+                        }
+                    colorDisplay[3]
+                        .opacity(flash[3] ? 1 : 0.4)
+                        .onTapGesture {
+                            checkPlayerInput(3)
+                            flashColorDisplay(index: 3)
+                        }
+                }
             }
-            HStack{
-                colorDisplay[2]
-                    .opacity(flash[2] ? 1 : 0.4)
-                    .onTapGesture {
-                        flashColorDisplay(index: 2)
-                        if index == 2 {
-                            score += 1
-                        } else {
-                            GameOver()
-                        }
-                    }
-                colorDisplay[3]
-                    .opacity(flash[3] ? 1 : 0.4)
-                    .onTapGesture {
-                        flashColorDisplay(index: 3)
-                        if index == 3 {
-                            score += 1
-                        } else {
-                            GameOver()
-                        }
-                        
-                        
-                        
-                    }
-            }
-            
         }
         .padding()
         .preferredColorScheme(.dark)
-        .onReceive(timer) { _ in
-                if index < sequence.count {
-                    flashColorDisplay(index: sequence[index])
-                    index += 1
-                    PlayerActive = true
-                } else {
-                        index = 0
-                        sequence.append(Int.random(in: 0...3))
-                }
-            
-        }
-        
     }
-    func GameOver() {
-        score = 0
-        PlayerTalk = "YOU LOST YOU FUCKING BITCH"
-        index = 0
-    }
-    func flashColorDisplay(index: Int) {
-           flash[index].toggle()
-           withAnimation(.easeInOut(duration: 0.5)) {
-               flash[index].toggle()
-           }
-       }
-}
 
+    func gameOver() {
+        score = 0
+        playerTalk = "YOU LOST"
+        playerActive = false
+        gameOverOpacity = 1.0
+    }
+
+    func flashColorDisplay(index: Int) {
+        flash[index].toggle()
+        withAnimation(.easeInOut(duration: 0.5)) {
+            flash[index].toggle()
+        }
+    }
+
+    func flashColorSequence() {
+        playerActive = false
+        playerTalk = "Watch carefully"
+        score = 0
+        flashSequence(index: 0)
+    }
+
+    func flashSequence(index: Int) {
+        if index < sequence.count {
+            flashColorDisplay(index: sequence[index])
+            let nextIndex = index + 1
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.flashSequence(index: nextIndex)
+            }
+        } else {
+            playerActive = true
+        }
+    }
+
+    func checkPlayerInput(_ input: Int) {
+        if playerActive {
+            if input == sequence[score] {
+                if score < sequence.count - 1 {
+                    score += 1
+                } else {
+                    score += 1
+                    playerTalk = "Well done!"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        addToSequence()
+                    }
+                }
+            } else {
+                gameOver()
+            }
+        }
+    }
+
+    func addToSequence() {
+        sequence.append(Int.random(in: 0...3))
+        flashColorSequence()
+    }
+}
 
 struct ColorDisplay: View {
     let color: Color
+
     var body: some View {
         RoundedRectangle(cornerRadius: 25.0)
             .fill(color)
@@ -110,10 +123,9 @@ struct ColorDisplay: View {
     }
 }
 
-
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
+
