@@ -109,6 +109,7 @@ struct ContentView: View {
     func addToSequence() {
         sequence.append(Int.random(in: 0...3))
         flashColorSequence()
+        score += 1
     }
 }
 
