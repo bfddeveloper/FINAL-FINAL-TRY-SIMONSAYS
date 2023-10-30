@@ -1,13 +1,31 @@
 import SwiftUI
+import AVFoundation
 
 struct ContentView: View {
     @State private var flash = [false, false, false, false]
-    @State private var colorDisplay = [ColorDisplay(color: .green), ColorDisplay(color: .red), ColorDisplay(color: .yellow), ColorDisplay(color: .blue)]
+    @State private var colorDisplay = [ColorDisplay(color: .green, sound: "green_sound"),
+                                      ColorDisplay(color: .red, sound: "red_sound"),
+                                      ColorDisplay(color: .yellow, sound: "yellow_sound"),
+                                      ColorDisplay(color: .blue, sound: "blue_sound")]
     @State var sequence = [Int]()
     @State var score = 0
     @State var gameOverOpacity = 0.0
     @State var playerActive = false
     @State var playerTalk = "Your turn"
+    var players: [AVAudioPlayer?] = [nil, nil, nil, nil]
+    
+    init() {
+        for (index, colorDisplay) in colorDisplay.enumerated() {
+            do {
+                if let fileURL = Bundle.main.url(forResource: colorDisplay.sound, withExtension: "mp3") {
+                    players[index] = try AVAudioPlayer(contentsOf: fileURL)
+                    players[index]?.prepareToPlay()
+                }
+            } catch {
+                print("Error loading sound file: \(error.localizedDescription)")
+            }
+        }
+    }
 
     var body: some View {
         VStack {
@@ -79,6 +97,7 @@ struct ContentView: View {
     func flashSequence(index: Int) {
         if index < sequence.count {
             flashColorDisplay(index: sequence[index])
+            playSound(index) // Play sound associated with the color
             let nextIndex = index + 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.flashSequence(index: nextIndex)
@@ -91,10 +110,8 @@ struct ContentView: View {
     func checkPlayerInput(_ input: Int) {
         if playerActive {
             if input == sequence[score] {
-                if score < sequence.count - 1 {
-                    score += 1
-                } else {
-                    score += 1
+                score += 1
+                if score == sequence.count {
                     playerTalk = "Well done!"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         addToSequence()
@@ -109,12 +126,18 @@ struct ContentView: View {
     func addToSequence() {
         sequence.append(Int.random(in: 0...3))
         flashColorSequence()
-        score += 1
+    }
+    
+    func playSound(_ index: Int) {
+        if let player = players[index] {
+            player.play()
+        }
     }
 }
 
 struct ColorDisplay: View {
     let color: Color
+    let sound: String
 
     var body: some View {
         RoundedRectangle(cornerRadius: 25.0)
