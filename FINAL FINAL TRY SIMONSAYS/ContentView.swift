@@ -34,19 +34,23 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Text("simon")
-                .font(.system(size: 72))
+                .font(.custom("Kanit-Black", size: 72))
             Button("Play") {
                 gameOverOpacity = 0.0
                 playSound("Start")
                 sequence = [Int.random(in: 0...3)]
                 flashColorSequence()
             }
+            .buttonStyle(GrowingButton())
             Text("YOU LOST")
-                .font(.system(size: 36))
+                .font(.custom("Kanit-Black", size: 36))
                 .opacity(gameOverOpacity)
             Text(playerTalk)
+                .font(.custom("Kanit-Black", size: 20))
             Text("HighScore: \(HighScore)")
+                .font(.custom("Kanit-Black", size: 20))
             Text("Level: \(level)")
+                .font(.custom("Kanit-Black", size: 45))
             VStack {
                 HStack {
                     colorDisplay[0]
@@ -80,6 +84,7 @@ struct ContentView: View {
                             playSound("3")
                         }
                 }
+                Spacer()
             }
         }
         .padding()
@@ -88,7 +93,6 @@ struct ContentView: View {
 
     func gameOver() {
         score = 0
-        level = 1
         if HighScore < level {
             HighScore = level
             playSound("HighScore")
@@ -97,12 +101,14 @@ struct ContentView: View {
             playSound("Lose")
             playerTalk = "LOSER"
         }
+        level = 1
         playerActive = false
         gameOverOpacity = 1.0
     }
 
     func flashColorDisplay(index: Int) {
         flash[index].toggle()
+        playSound(String(index))
         withAnimation(.easeInOut(duration: 0.5)) {
             flash[index].toggle()
         }
@@ -118,7 +124,6 @@ struct ContentView: View {
     func flashSequence(index: Int) {
         if index < sequence.count {
             flashColorDisplay(index: sequence[index])
-            playSound(String(index))
             let nextIndex = index + 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.flashSequence(index: nextIndex)
@@ -178,6 +183,18 @@ struct ColorDisplay: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct GrowingButton: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding()
+            .background(.blue)
+            .foregroundStyle(.white)
+            .clipShape(Capsule())
+            .scaleEffect(configuration.isPressed ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
     }
 }
 

@@ -16,6 +16,7 @@
 		345AA1D12AE814F700FE644A /* FINAL_FINAL_TRY_SIMONSAYSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345AA1D02AE814F700FE644A /* FINAL_FINAL_TRY_SIMONSAYSUITestsLaunchTests.swift */; };
 		345AA1DE2AE8439800FE644A /* ColorDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345AA1DD2AE8439800FE644A /* ColorDisplay.swift */; };
 		345AA1E12AEFFD1F00FE644A /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 345AA1E02AEFFD1F00FE644A /* Sounds */; };
+		345AA21B2AF0098B00FE644A /* Kanit in Resources */ = {isa = PBXBuildFile; fileRef = 345AA21A2AF0098B00FE644A /* Kanit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		345AA1DD2AE8439800FE644A /* ColorDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorDisplay.swift; sourceTree = "<group>"; };
 		345AA1DF2AEF616700FE644A /* FINAL-FINAL-TRY-SIMONSAYS-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "FINAL-FINAL-TRY-SIMONSAYS-Info.plist"; sourceTree = SOURCE_ROOT; };
 		345AA1E02AEFFD1F00FE644A /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
+		345AA21A2AF0098B00FE644A /* Kanit */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Kanit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 				345AA1DD2AE8439800FE644A /* ColorDisplay.swift */,
 				345AA1B32AE814F600FE644A /* FINAL_FINAL_TRY_SIMONSAYSApp.swift */,
 				345AA1B52AE814F600FE644A /* ContentView.swift */,
+				345AA21A2AF0098B00FE644A /* Kanit */,
 				345AA1B72AE814F700FE644A /* Assets.xcassets */,
 				345AA1E02AEFFD1F00FE644A /* Sounds */,
 				345AA1B92AE814F700FE644A /* Preview Content */,
@@ -239,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				345AA21B2AF0098B00FE644A /* Kanit in Resources */,
 				345AA1E12AEFFD1F00FE644A /* Sounds in Resources */,
 				345AA1BB2AE814F700FE644A /* Preview Assets.xcassets in Resources */,
 				345AA1B82AE814F700FE644A /* Assets.xcassets in Resources */,
