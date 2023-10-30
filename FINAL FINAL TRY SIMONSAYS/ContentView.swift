@@ -1,43 +1,52 @@
 import SwiftUI
 import AVFoundation
 
+
 struct ContentView: View {
+    @State var audioPlayer: AVAudioPlayer!
     @State private var flash = [false, false, false, false]
     @State private var colorDisplay = [ColorDisplay(color: .green, sound: "green_sound"),
-                                      ColorDisplay(color: .red, sound: "red_sound"),
-                                      ColorDisplay(color: .yellow, sound: "yellow_sound"),
-                                      ColorDisplay(color: .blue, sound: "blue_sound")]
+                                          ColorDisplay(color: .red, sound: "red_sound"),
+                                          ColorDisplay(color: .yellow, sound: "yellow_sound"),
+                                          ColorDisplay(color: .blue, sound: "blue_sound")]
     @State var sequence = [Int]()
     @State var score = 0
+    @State var HighScore = 0
     @State var gameOverOpacity = 0.0
     @State var playerActive = false
     @State var playerTalk = "Your turn"
+    @State var level = 1
     var players: [AVAudioPlayer?] = [nil, nil, nil, nil]
     
     init() {
-        for (index, colorDisplay) in colorDisplay.enumerated() {
-            do {
-                if let fileURL = Bundle.main.url(forResource: colorDisplay.sound, withExtension: "mp3") {
-                    players[index] = try AVAudioPlayer(contentsOf: fileURL)
-                    players[index]?.prepareToPlay()
+            for (index, colorDisplay) in colorDisplay.enumerated() {
+                do {
+                    if let fileURL = Bundle.main.url(forResource: colorDisplay.sound, withExtension: "mp3") {
+                        players[index] = try AVAudioPlayer(contentsOf: fileURL)
+                        players[index]?.prepareToPlay()
+                    }
+                } catch {
+                    print("Error loading sound file: \(error.localizedDescription)")
                 }
-            } catch {
-                print("Error loading sound file: \(error.localizedDescription)")
             }
         }
-    }
 
     var body: some View {
         VStack {
+            Text("simon")
+                .font(.system(size: 72))
             Button("Play") {
                 gameOverOpacity = 0.0
+                playSound("Start")
                 sequence = [Int.random(in: 0...3)]
                 flashColorSequence()
             }
             Text("YOU LOST")
                 .font(.system(size: 36))
                 .opacity(gameOverOpacity)
-            Text("Score: \(score)")
+            Text(playerTalk)
+            Text("HighScore: \(HighScore)")
+            Text("Level: \(level)")
             VStack {
                 HStack {
                     colorDisplay[0]
@@ -45,12 +54,14 @@ struct ContentView: View {
                         .onTapGesture {
                             checkPlayerInput(0)
                             flashColorDisplay(index: 0)
+                            playSound("0")
                         }
                     colorDisplay[1]
                         .opacity(flash[1] ? 1 : 0.4)
                         .onTapGesture {
                             checkPlayerInput(1)
                             flashColorDisplay(index: 1)
+                            playSound("1")
                         }
                 }
                 HStack {
@@ -59,12 +70,14 @@ struct ContentView: View {
                         .onTapGesture {
                             checkPlayerInput(2)
                             flashColorDisplay(index: 2)
+                            playSound("2")
                         }
                     colorDisplay[3]
                         .opacity(flash[3] ? 1 : 0.4)
                         .onTapGesture {
                             checkPlayerInput(3)
                             flashColorDisplay(index: 3)
+                            playSound("3")
                         }
                 }
             }
@@ -75,7 +88,15 @@ struct ContentView: View {
 
     func gameOver() {
         score = 0
-        playerTalk = "YOU LOST"
+        level = 1
+        if HighScore < level {
+            HighScore = level
+            playSound("HighScore")
+            playerTalk = "New Highscore"
+        } else {
+            playSound("Lose")
+            playerTalk = "LOSER"
+        }
         playerActive = false
         gameOverOpacity = 1.0
     }
@@ -97,7 +118,7 @@ struct ContentView: View {
     func flashSequence(index: Int) {
         if index < sequence.count {
             flashColorDisplay(index: sequence[index])
-            playSound(index) // Play sound associated with the color
+            playSound(String(index))
             let nextIndex = index + 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.flashSequence(index: nextIndex)
@@ -113,7 +134,9 @@ struct ContentView: View {
                 score += 1
                 if score == sequence.count {
                     playerTalk = "Well done!"
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        level += 1
                         addToSequence()
                     }
                 }
@@ -127,18 +150,23 @@ struct ContentView: View {
         sequence.append(Int.random(in: 0...3))
         flashColorSequence()
     }
-    
-    func playSound(_ index: Int) {
-        if let player = players[index] {
-            player.play()
+    func playSound(_ soundFileName: String) {
+        guard let soundURL = Bundle.main.url(forResource: soundFileName, withExtension: "wav", subdirectory: "Sounds") else {
+            fatalError("Unable to find \(soundFileName) in bundle")
         }
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+        } catch {
+            print(error.localizedDescription)
+        }
+        audioPlayer.play()
     }
 }
 
 struct ColorDisplay: View {
     let color: Color
     let sound: String
-
+    
     var body: some View {
         RoundedRectangle(cornerRadius: 25.0)
             .fill(color)
